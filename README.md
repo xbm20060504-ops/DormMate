@@ -1,6 +1,7 @@
 # DormMate — Smart Shared Dormitory Resource & Task Management System
 
-![DormMate Banner](https://via.placeholder.com/1200x400/0F172A/FFFFFF?text=DormMate+-+Smart+Shared+Dormitory+Management)
+![DormMate Banner](<img width="892" height="967" alt="屏幕截图 2026-04-15 150615" src="https://github.com/user-attachments/assets/0aa3270a-e428-4613-a9b1-b67af38e2917" />
+)
 
 > **COMP2116 Software Engineering — Final Project**  
 > Macao Polytechnic University, 2025/26 Semester 2
@@ -9,12 +10,10 @@
 
 ## 📌 Graphical Abstract
 
-![Graphical Abstract](https://via.placeholder.com/900x500/6366F1/FFFFFF?text=DormMate+Graphical+Abstract)
+![Graphical Abstract](<img width="892" height="967" alt="屏幕截图 2026-04-15 150615" src="https://github.com/user-attachments/assets/453b8852-f93f-48c9-8fb8-6bd1216468cf" />
+)
 
-<!-- 
-TODO: Replace with actual screenshot of running application (Dashboard page).
-Run the app → login → take screenshot of Dashboard with data → save as graphical_abstract.png → upload to GitHub
--->
+
 
 DormMate is a **web-based smart dormitory management system** designed for university students sharing dormitory rooms. It solves the common pain points of shared living — scheduling shared resources (washing machines, kitchens), rotating chores fairly, splitting expenses transparently, and keeping roommates informed through a notice board — all in one unified platform built with **Django** and **Bootstrap 5**.
 
