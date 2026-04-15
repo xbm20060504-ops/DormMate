@@ -1,7 +1,6 @@
 # DormMate — Smart Shared Dormitory Resource & Task Management System
 
-![DormMate Banner](<img width="892" height="967" alt="屏幕截图 2026-04-15 150615" src="https://github.com/user-attachments/assets/0aa3270a-e428-4613-a9b1-b67af38e2917" />
-)
+![DormMate Banner](https://github.com/user-attachments/assets/0aa3270a-e428-4613-a9b1-b67af38e2917)
 
 > **COMP2116 Software Engineering — Final Project**  
 > Macao Polytechnic University, 2025/26 Semester 2
@@ -10,8 +9,7 @@
 
 ## 📌 Graphical Abstract
 
-![Graphical Abstract](<img width="892" height="967" alt="屏幕截图 2026-04-15 150615" src="https://github.com/user-attachments/assets/453b8852-f93f-48c9-8fb8-6bd1216468cf" />
-)
+![Graphical Abstract](https://github.com/user-attachments/assets/453b8852-f93f-48c9-8fb8-6bd1216468cf)
 
 
 
