@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}Expenses - DormMate{% endblock %}
+{% block page_title %}Shared Expenses{% endblock %}
+{% block top_actions %}
+<a href="{% url 'expense_create' room_pk=room.pk %}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Add Expense</a>
+{% endblock %}
+
+{% block content %}
+<!-- Balance Overview -->
+<div class="card-section mb-4">
+    <h6 class="mb-3"><i class="bi bi-wallet2" style="color:#3B82F6;"></i> Balance Overview</h6>
+    <div class="mb-2" style="font-size:0.82rem;color:#64748B;">
+        Total unsettled: <strong style="color:#0F172A;">MOP {{ total_unsettled|floatformat:2 }}</strong>
+    </div>
+    {% for member, bal in balances.items %}
+    <div class="list-item">
+        <div>
+            <span class="fw-medium" style="font-size:0.88rem;">{{ member.get_full_name|default:member.username }}</span>
+            <span style="font-size:0.78rem;color:#64748B;">
+                Paid: MOP {{ bal.paid|floatformat:2 }} · Owes: MOP {{ bal.owed|floatformat:2 }}
+            </span>
+        </div>
+        <span class="fw-bold" style="font-size:0.88rem;color:{% if bal.net >= 0 %}#10B981{% else %}#EF4444{% endif %};">
+            {% if bal.net >= 0 %}+{% endif %}MOP {{ bal.net|floatformat:2 }}
+        </span>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Unsettled Expenses -->
+<div class="card-section mb-4">
+    <h6 class="mb-3"><i class="bi bi-hourglass" style="color:#F97316;"></i> Unsettled Expenses</h6>
+    {% for expense in unsettled %}
+    <div class="list-item">
+        <div>
+            <strong style="font-size:0.88rem;">{{ expense.title }}</strong>
+            <span class="badge bg-light text-dark ms-1" style="font-size:0.7rem;">{{ expense.get_category_display }}</span>
+            <div style="font-size:0.78rem;color:#64748B;">
+                Paid by {{ expense.paid_by.username }} · {{ expense.date|date:"M d" }}
+                · MOP {{ expense.per_person_amount|floatformat:2 }}/person
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <strong style="font-size:0.95rem;">MOP {{ expense.amount|floatformat:2 }}</strong>
+            {% if room.owner == request.user or expense.paid_by == request.user %}
+            <a href="{% url 'expense_settle' pk=expense.pk %}" class="btn btn-sm btn-outline-success" style="font-size:0.72rem;padding:2px 8px;">Settle</a>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-muted" style="font-size:0.85rem;">No unsettled expenses. You're all square!</p>
+    {% endfor %}
+</div>
+
+<!-- Settled History -->
+{% if settled %}
+<div class="card-section">
+    <h6 class="mb-3"><i class="bi bi-check-circle" style="color:#10B981;"></i> Settled (Recent)</h6>
+    {% for expense in settled %}
+    <div class="list-item" style="opacity:0.6;">
+        <div>
+            <span style="text-decoration:line-through;">{{ expense.title }}</span>
+            <span style="font-size:0.78rem;color:#64748B;"> · {{ expense.paid_by.username }} · {{ expense.date|date:"M d" }}</span>
+        </div>
+        <span style="font-size:0.85rem;">MOP {{ expense.amount|floatformat:2 }}</span>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="mt-3">
+    <a href="{% url 'room_detail' pk=room.pk %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Back to Room</a>
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Chores - DormMate{% endblock %}
+{% block page_title %}Chore Schedule{% endblock %}
+{% block top_actions %}
+<div class="d-flex gap-2">
+    {% if room.owner == request.user %}
+    <a href="{% url 'chore_auto_rotate' room_pk=room.pk %}" class="btn btn-outline-success btn-sm"><i class="bi bi-arrow-repeat"></i> Auto-Rotate</a>
+    <a href="{% url 'chore_create' room_pk=room.pk %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-plus-lg"></i> New Chore</a>
+    {% endif %}
+    <a href="{% url 'chore_assign' room_pk=room.pk %}" class="btn btn-primary btn-sm"><i class="bi bi-person-plus"></i> Assign</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Pending Assignments -->
+<div class="card-section mb-4">
+    <h6 class="mb-3"><i class="bi bi-hourglass-split" style="color:#F97316;"></i> Pending Chores</h6>
+    {% for a in pending_assignments %}
+    <div class="list-item">
+        <div>
+            <span class="fw-medium">{{ a.chore.name }}</span>
+            <span class="text-muted" style="font-size:0.82rem;">
+                → {{ a.assigned_to.get_full_name|default:a.assigned_to.username }}
+            </span>
+            <span style="font-size:0.78rem;color:{% if a.is_overdue %}#EF4444{% else %}#64748B{% endif %};">
+                · Due {{ a.due_date|date:"M d" }} {% if a.is_overdue %}(Overdue!){% endif %}
+            </span>
+        </div>
+        <div class="d-flex gap-2">
+            {% if a.is_overdue %}
+            <span class="badge badge-overdue" style="font-size:0.7rem;">Overdue</span>
+            {% endif %}
+            {% if a.assigned_to == request.user %}
+            <a href="{% url 'chore_complete' pk=a.pk %}" class="btn btn-sm btn-outline-success" style="font-size:0.75rem;padding:2px 10px;">Done ✓</a>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-muted" style="font-size:0.85rem;">No pending chores! All caught up.</p>
+    {% endfor %}
+</div>
+
+<!-- Recently Completed -->
+<div class="card-section mb-4">
+    <h6 class="mb-3"><i class="bi bi-check-circle-fill" style="color:#10B981;"></i> Recently Completed (7 days)</h6>
+    {% for a in completed_assignments %}
+    <div class="list-item" style="opacity:0.7;">
+        <div>
+            <span style="text-decoration:line-through;">{{ a.chore.name }}</span>
+            <span class="text-muted" style="font-size:0.82rem;">— {{ a.assigned_to.username }}</span>
+        </div>
+        <span style="font-size:0.75rem;color:#10B981;">{{ a.completed_at|timesince }} ago</span>
+    </div>
+    {% empty %}
+    <p class="text-muted" style="font-size:0.85rem;">Nothing completed recently.</p>
+    {% endfor %}
+</div>
+
+<!-- Chore Types -->
+<div class="card-section">
+    <h6 class="mb-3"><i class="bi bi-list-ul" style="color:#6366F1;"></i> Registered Chores</h6>
+    {% for chore in chores %}
+    <div class="list-item">
+        <div>
+            <strong style="font-size:0.88rem;">{{ chore.name }}</strong>
+            {% if chore.description %}<span class="text-muted" style="font-size:0.78rem;"> · {{ chore.description|truncatechars:50 }}</span>{% endif %}
+        </div>
+        <span class="badge bg-light text-dark" style="font-size:0.75rem;">{{ chore.get_frequency_display }}</span>
+    </div>
+    {% empty %}
+    <p class="text-muted" style="font-size:0.85rem;">No chores defined yet.</p>
+    {% endfor %}
+</div>
+
+<div class="mt-3">
+    <a href="{% url 'room_detail' pk=room.pk %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Back to Room</a>
+</div>
+{% endblock %}

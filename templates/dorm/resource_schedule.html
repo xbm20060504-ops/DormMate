@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block title %}{{ resource.name }} Schedule - DormMate{% endblock %}
+{% block page_title %}{{ resource.name }}{% endblock %}
+{% block top_actions %}
+<a href="{% url 'booking_create' resource_pk=resource.pk %}?date={{ selected_date|date:'Y-m-d' }}" class="btn btn-primary btn-sm">
+    <i class="bi bi-plus-lg"></i> Book Slot
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="card-section mb-4">
+    <div class="d-flex align-items-center gap-3 mb-3">
+        <div style="width:40px;height:40px;border-radius:10px;background:{{ resource.category_color }}15;color:{{ resource.category_color }};display:flex;align-items:center;justify-content:center;">
+            <i class="bi {{ resource.icon }}"></i>
+        </div>
+        <div>
+            <span class="text-muted" style="font-size:0.82rem;">{{ resource.get_category_display }}</span>
+            <div class="fw-bold">{{ resource.name }}</div>
+        </div>
+    </div>
+    {% if resource.description %}
+    <p class="text-muted" style="font-size:0.85rem;">{{ resource.description }}</p>
+    {% endif %}
+    <div style="font-size:0.82rem;color:#64748B;">
+        Available {{ resource.available_from|time:"H:i" }} – {{ resource.available_until|time:"H:i" }} · {{ resource.slot_duration_minutes }}min slots
+    </div>
+</div>
+
+<!-- Date Picker -->
+<div class="card-section mb-4">
+    <h6 class="mb-3">Select Date</h6>
+    <div class="d-flex gap-2 flex-wrap">
+        {% for d in dates %}
+        <a href="?date={{ d|date:'Y-m-d' }}"
+           class="px-3 py-2 text-decoration-none text-center"
+           style="border-radius:10px;min-width:70px;font-size:0.82rem;
+                  {% if d == selected_date %}background:#6366F1;color:white;font-weight:700;
+                  {% else %}background:#F1F5F9;color:#0F172A;{% endif %}">
+            <div style="font-size:0.7rem;{% if d == selected_date %}color:#E0E7FF;{% else %}color:#94A3B8;{% endif %}">
+                {{ d|date:"D" }}
+            </div>
+            {{ d|date:"M d" }}
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Bookings for Selected Date -->
+<div class="card-section">
+    <h6 class="mb-3">Bookings for {{ selected_date|date:"l, M d" }}</h6>
+    {% for booking in bookings %}
+    <div class="list-item">
+        <div class="d-flex align-items-center gap-3">
+            <div style="width:6px;height:36px;border-radius:3px;background:{% if booking.is_ongoing %}#10B981{% else %}#6366F1{% endif %};"></div>
+            <div>
+                <div class="fw-medium" style="font-size:0.88rem;">
+                    {{ booking.start_time|time:"H:i" }} – {{ booking.end_time|time:"H:i" }}
+                </div>
+                <div style="font-size:0.78rem;color:#64748B;">
+                    {{ booking.user.get_full_name|default:booking.user.username }}
+                    {% if booking.note %} · {{ booking.note }}{% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            {% if booking.is_ongoing %}
+            <span class="badge badge-done">In Use</span>
+            {% endif %}
+            {% if booking.user == request.user and not booking.is_past %}
+            <form method="post" action="{% url 'booking_cancel' pk=booking.pk %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger btn-sm" style="font-size:0.72rem;padding:2px 8px;">Cancel</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="text-center py-4 text-muted">
+        <i class="bi bi-calendar-plus d-block fs-2 mb-2"></i>
+        <p style="font-size:0.88rem;">No bookings for this date. Be the first to book!</p>
+        <a href="{% url 'booking_create' resource_pk=resource.pk %}?date={{ selected_date|date:'Y-m-d' }}" class="btn btn-primary btn-sm">
+            Book Now
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="mt-3">
+    <a href="{% url 'room_detail' pk=room.pk %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Back to Room</a>
+</div>
+{% endblock %}

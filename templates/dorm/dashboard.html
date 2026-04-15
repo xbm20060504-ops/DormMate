@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard - DormMate{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+{% if not current_room %}
+<div class="text-center py-5">
+    <i class="bi bi-house-heart display-2 text-muted d-block mb-3"></i>
+    <h4 class="fw-bold">Welcome to DormMate!</h4>
+    <p class="text-muted mb-4">Get started by creating a room or joining one with an invite code.</p>
+    <div class="d-flex gap-3 justify-content-center">
+        <a href="{% url 'room_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Create Room</a>
+        <a href="{% url 'room_join' %}" class="btn btn-outline-primary"><i class="bi bi-box-arrow-in-right"></i> Join Room</a>
+    </div>
+</div>
+{% else %}
+
+<!-- Room Header -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <span class="text-muted" style="font-size:0.82rem;">Current Room</span>
+        <h4 class="fw-bold mb-0" style="letter-spacing:-0.5px;">{{ current_room.name }}</h4>
+    </div>
+    {% if rooms.count > 1 %}
+    <div class="dropdown">
+        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+            Switch Room
+        </button>
+        <ul class="dropdown-menu">
+            {% for r in rooms %}
+            <li><a class="dropdown-item" href="{% url 'room_detail' pk=r.pk %}">{{ r.name }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3 col-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div><div class="stat-number">{{ stats.members }}</div><div class="stat-label">Roommates</div></div>
+                <div class="stat-icon" style="background:#EEF2FF;color:#6366F1;"><i class="bi bi-people-fill"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div><div class="stat-number">{{ stats.resources }}</div><div class="stat-label">Resources</div></div>
+                <div class="stat-icon" style="background:#FFF7ED;color:#F97316;"><i class="bi bi-box-seam"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div><div class="stat-number">{{ stats.pending_chores }}</div><div class="stat-label">Pending Chores</div></div>
+                <div class="stat-icon" style="background:{% if stats.overdue_chores > 0 %}#FEE2E2{% else %}#F0FDF4{% endif %};color:{% if stats.overdue_chores > 0 %}#EF4444{% else %}#10B981{% endif %};"><i class="bi bi-check2-square"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div><div class="stat-number">MOP {{ stats.unsettled_amount|floatformat:0 }}</div><div class="stat-label">Unsettled</div></div>
+                <div class="stat-icon" style="background:#ECFDF5;color:#10B981;"><i class="bi bi-wallet2"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Left Column -->
+    <div class="col-lg-8">
+        <!-- Today's Bookings -->
+        <div class="card-section mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0"><i class="bi bi-calendar-check" style="color:#3B82F6;"></i> Today's Bookings</h6>
+                <a href="{% url 'room_detail' pk=current_room.pk %}" class="text-decoration-none" style="font-size:0.82rem;">View Resources →</a>
+            </div>
+            {% for booking in todays_bookings %}
+            <div class="list-item">
+                <div>
+                    <strong>{{ booking.resource.name }}</strong>
+                    <span class="text-muted" style="font-size:0.8rem;">— {{ booking.user.get_full_name|default:booking.user.username }}</span>
+                    {% if booking.note %}<span class="text-muted" style="font-size:0.78rem;"> · {{ booking.note }}</span>{% endif %}
+                </div>
+                <div>
+                    <span class="badge bg-light text-dark" style="font-size:0.78rem;">
+                        {{ booking.start_time|time:"H:i" }} – {{ booking.end_time|time:"H:i" }}
+                    </span>
+                    {% if booking.is_ongoing %}
+                    <span class="badge badge-done" style="font-size:0.72rem;">Now</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-muted mb-0" style="font-size:0.85rem;">No bookings today.</p>
+            {% endfor %}
+        </div>
+
+        <!-- My Chores -->
+        <div class="card-section mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0"><i class="bi bi-list-check" style="color:#10B981;"></i> My Pending Chores</h6>
+                <a href="{% url 'chore_list' room_pk=current_room.pk %}" class="text-decoration-none" style="font-size:0.82rem;">All Chores →</a>
+            </div>
+            {% for assignment in my_chores %}
+            <div class="list-item">
+                <div>
+                    <span class="fw-medium">{{ assignment.chore.name }}</span>
+                    <span style="font-size:0.78rem;color:{% if assignment.is_overdue %}#EF4444{% else %}#64748B{% endif %};">
+                        — due {{ assignment.due_date|date:"M d" }}
+                        {% if assignment.is_overdue %}(Overdue!){% endif %}
+                    </span>
+                </div>
+                <a href="{% url 'chore_complete' pk=assignment.pk %}" class="btn btn-sm btn-outline-success"
+                   style="font-size:0.75rem;padding:2px 10px;">Done ✓</a>
+            </div>
+            {% empty %}
+            <p class="text-muted mb-0" style="font-size:0.85rem;">All caught up! No pending chores.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="col-lg-4">
+        <!-- Announcements -->
+        <div class="card-section mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0"><i class="bi bi-megaphone" style="color:#F97316;"></i> Announcements</h6>
+                <a href="{% url 'announcement_list' room_pk=current_room.pk %}" class="text-decoration-none" style="font-size:0.82rem;">All →</a>
+            </div>
+            {% for ann in announcements %}
+            <div class="mb-3 p-2" style="background:#F8FAFC;border-radius:8px;">
+                <div class="d-flex justify-content-between align-items-start">
+                    <strong style="font-size:0.85rem;">{{ ann.title }}</strong>
+                    <span class="badge badge-{{ ann.priority|lower }}" style="font-size:0.68rem;">{{ ann.get_priority_display }}</span>
+                </div>
+                <p class="mb-0 text-muted" style="font-size:0.78rem;">{{ ann.content|truncatechars:80 }}</p>
+                <div style="font-size:0.7rem;color:#94A3B8;">{{ ann.author.username }} · {{ ann.created_at|timesince }} ago</div>
+            </div>
+            {% empty %}
+            <p class="text-muted mb-0" style="font-size:0.85rem;">No announcements.</p>
+            {% endfor %}
+        </div>
+
+        <!-- Activity -->
+        <div class="card-section">
+            <h6 class="mb-3"><i class="bi bi-clock-history" style="color:#8B5CF6;"></i> Recent Activity</h6>
+            {% for a in activities %}
+            <div class="activity-item">
+                <strong>{{ a.user.username }}</strong> {{ a.get_action_display|lower }}
+                {{ a.target_type|lower }} <em>"{{ a.target_name|truncatechars:25 }}"</em>
+                <div style="font-size:0.72rem;color:#94A3B8;">{{ a.timestamp|timesince }} ago</div>
+            </div>
+            {% empty %}
+            <p class="text-muted mb-0" style="font-size:0.85rem;">No activity yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

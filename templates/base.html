@@ -1,0 +1,220 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}DormMate{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-dark: #4F46E5;
+            --primary-light: #A5B4FC;
+            --sidebar-bg: #0F172A;
+            --sidebar-text: #94A3B8;
+            --bg-main: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --accent-orange: #F97316;
+            --accent-green: #10B981;
+            --accent-blue: #3B82F6;
+            --accent-red: #EF4444;
+            --accent-purple: #8B5CF6;
+            --accent-cyan: #06B6D4;
+            --accent-pink: #EC4899;
+        }
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: var(--bg-main); min-height: 100vh; }
+
+        .sidebar {
+            width: 260px; min-height: 100vh; background: var(--sidebar-bg);
+            position: fixed; left: 0; top: 0; z-index: 100;
+            transition: transform 0.3s ease;
+        }
+        .sidebar .brand {
+            padding: 1.5rem 1.25rem; font-size: 1.3rem; font-weight: 800;
+            color: white; border-bottom: 1px solid rgba(255,255,255,0.06);
+            letter-spacing: -0.5px;
+        }
+        .sidebar .brand i { color: var(--accent-orange); font-size: 1.4rem; }
+        .sidebar .nav-section {
+            font-size: 0.7rem; font-weight: 600; color: #475569;
+            text-transform: uppercase; letter-spacing: 1px;
+            padding: 1.2rem 1.25rem 0.5rem;
+        }
+        .sidebar .nav-link {
+            color: var(--sidebar-text); padding: 0.65rem 1.25rem;
+            font-size: 0.88rem; font-weight: 500; transition: all 0.2s;
+            border-left: 3px solid transparent; border-radius: 0;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            color: white; background: rgba(99,102,241,0.12);
+            border-left-color: var(--primary);
+        }
+        .sidebar .nav-link i { width: 22px; margin-right: 10px; font-size: 1rem; }
+
+        .main-content { margin-left: 260px; }
+        .top-bar {
+            background: white; padding: 1rem 2rem;
+            border-bottom: 1px solid #E2E8F0;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .top-bar h5 { font-weight: 700; letter-spacing: -0.3px; }
+        .content-area { padding: 1.75rem 2rem; }
+
+        .stat-card {
+            background: white; border-radius: 14px; padding: 1.4rem;
+            border: 1px solid #E2E8F0; transition: all 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
+        .stat-icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.15rem;
+        }
+        .stat-number { font-size: 1.6rem; font-weight: 800; color: #0F172A; letter-spacing: -0.5px; }
+        .stat-label { font-size: 0.8rem; color: #64748B; font-weight: 500; }
+
+        .card-section {
+            background: white; border-radius: 14px; padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+        }
+        .card-section h6 { font-weight: 700; font-size: 0.95rem; letter-spacing: -0.2px; }
+
+        .list-item {
+            padding: 0.75rem 0; border-bottom: 1px solid #F1F5F9;
+            font-size: 0.88rem; display: flex; justify-content: space-between; align-items: center;
+        }
+        .list-item:last-child { border-bottom: none; }
+
+        .badge-info { background: #DBEAFE; color: #1E40AF; }
+        .badge-warning { background: #FEF3C7; color: #92400E; }
+        .badge-urgent { background: #FEE2E2; color: #991B1B; }
+        .badge-done { background: #D1FAE5; color: #065F46; }
+        .badge-pending { background: #F1F5F9; color: #475569; }
+        .badge-overdue { background: #FEE2E2; color: #991B1B; }
+
+        .progress { height: 6px; border-radius: 3px; background: #F1F5F9; }
+
+        .btn-primary { background: var(--primary); border-color: var(--primary); font-weight: 600; }
+        .btn-primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
+
+        .activity-item {
+            padding: 0.55rem 0; border-bottom: 1px solid #F8FAFC; font-size: 0.82rem;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.show { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if user.is_authenticated %}
+    <nav class="sidebar" id="sidebar">
+        <div class="brand">
+            <i class="bi bi-house-heart-fill"></i> DormMate
+        </div>
+        <ul class="nav flex-column mt-2">
+            <li class="nav-section">Main</li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+                   href="{% url 'dashboard' %}">
+                    <i class="bi bi-grid-1x2-fill"></i> Dashboard
+                </a>
+            </li>
+
+            {% if current_room %}
+            <li class="nav-section">Room</li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'room_detail' %}active{% endif %}"
+                   href="{% url 'room_detail' pk=current_room.pk %}">
+                    <i class="bi bi-door-open"></i> {{ current_room.name|truncatechars:18 }}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'chore_list' %}active{% endif %}"
+                   href="{% url 'chore_list' room_pk=current_room.pk %}">
+                    <i class="bi bi-check2-square"></i> Chores
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'expense_list' %}active{% endif %}"
+                   href="{% url 'expense_list' room_pk=current_room.pk %}">
+                    <i class="bi bi-wallet2"></i> Expenses
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'announcement_list' %}active{% endif %}"
+                   href="{% url 'announcement_list' room_pk=current_room.pk %}">
+                    <i class="bi bi-megaphone"></i> Announcements
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'analytics' %}active{% endif %}"
+                   href="{% url 'analytics' room_pk=current_room.pk %}">
+                    <i class="bi bi-bar-chart-line"></i> Analytics
+                </a>
+            </li>
+            {% endif %}
+
+            <li class="nav-section">Account</li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'room_create' %}">
+                    <i class="bi bi-plus-circle"></i> Create Room
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'room_join' %}">
+                    <i class="bi bi-box-arrow-in-right"></i> Join Room
+                </a>
+            </li>
+        </ul>
+        <div class="p-3" style="position:absolute;bottom:0;width:100%;">
+            <div class="d-flex align-items-center text-white mb-2" style="font-size:0.82rem;">
+                <i class="bi bi-person-circle me-2"></i>
+                {{ user.get_full_name|default:user.username }}
+            </div>
+            <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm w-100" style="font-size:0.8rem;">
+                <i class="bi bi-box-arrow-left"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-link d-md-none p-0" onclick="document.getElementById('sidebar').classList.toggle('show')">
+                    <i class="bi bi-list fs-4"></i>
+                </button>
+                <h5 class="mb-0">{% block page_title %}Dashboard{% endblock %}</h5>
+            </div>
+            <div>{% block top_actions %}{% endblock %}</div>
+        </div>
+
+        {% if messages %}
+        <div class="content-area pb-0">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" style="border-radius:10px;font-size:0.9rem;">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="content-area">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    {% else %}
+        {% block public_content %}{% endblock %}
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

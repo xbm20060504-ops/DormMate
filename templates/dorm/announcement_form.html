@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Post Announcement - DormMate{% endblock %}
+{% block page_title %}Post Announcement{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card-section">
+            <div class="mb-3"><span class="badge bg-light text-dark"><i class="bi bi-door-open"></i> {{ room.name }}</span></div>
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{{ field.label }}</label>
+                    {% if field.name == 'is_pinned' %}
+                    <div class="form-check">
+                        {{ field }}
+                        <label class="form-check-label" for="{{ field.id_for_label }}">Pin this announcement</label>
+                    </div>
+                    {% else %}
+                    {{ field }}
+                    {% endif %}
+                </div>
+                {% endfor %}
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Post</button>
+                    <a href="{% url 'announcement_list' room_pk=room.pk %}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
