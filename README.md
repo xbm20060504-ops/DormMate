@@ -226,7 +226,7 @@ Output: Boolean
 
 ## 🎬 Demo
 
-📺 **Demo Video:** [YouTube Link]([(https://youtu.be/H5U_CPvkeqs)])
+📺 **Demo Video:** [YouTube Link](https://youtu.be/H5U_CPvkeqs)
 
 <!-- TODO: Replace with actual YouTube URL after recording -->
 
